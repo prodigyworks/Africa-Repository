@@ -744,6 +744,7 @@
 					$contactemail = $member['email'];
 					$contactfullname = $member['fullname'];
 					$contactfirstname = $member['firstname'];
+					$casenumber = $_POST['casenumber'];
 					$message = "";
 					
 					if ($_POST['datereceived'] != "") {
@@ -753,7 +754,7 @@
 						$message = "Your transcription request for case number $casenumber has been received back from the typist. The office is busy finalizing the transcript.";
 						
 					} else if ($_POST['dataexpectedbackfromtypist'] != "") {
-						$datesenttotypist = date("d/m/Y");
+						$datesenttotypist = $_POST['datesenttotypist'];
 						$dataexpectedbackfromtypist = $_POST['dataexpectedbackfromtypist'];
 						$message = "Your transcription request for case number $casenumber has been sent out to a typist on $datesenttotypist and is expected back from the typist on $dataexpectedbackfromtypist.";
 					}
