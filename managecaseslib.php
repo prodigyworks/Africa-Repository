@@ -172,6 +172,7 @@
 						'name'		 => 'courtname',
 						'length'	 => 30,
 						'editable'	 => false,
+						'label' 	 => 'Court',
 						'bind'		 => false
 					),
 					array(
@@ -199,6 +200,22 @@
 						'bind'		 => false,
 						'suffix'	 => "<img src='images/add.png' onclick='javascript: editContact()' />",
 						'showInView' => false
+					),
+					array(
+						'name'       => 'emailtoclient',
+						'length' 	 => 20,
+						'label' 	 => 'Email to client',
+						'type'       => 'COMBO',
+						'options'    => array(
+								array(
+									'value'		=> "Y",
+									'text'		=> "Yes"
+								),
+								array(
+									'value'		=> "N",
+									'text'		=> "No"
+								)
+							)
 					),
 					array(
 						'name'       => 'id',
@@ -748,14 +765,16 @@
 			$alerttrigger = false;
 			$table = $this->getEmailHTML($caseid);
 			$membername = GetUserName();
+			$casenumber = $_POST['casenumber'];
+			$emailtoclient = $_POST['emailtoclient'];
 			
-			if ($this->dateExpectedBack != $_POST['dataexpectedbackfromtypist'] || 
-				$this->dateReceived != $_POST['datereceived'] ||
-				$this->dateBackFromTypist != $_POST['datebackfromtypist']) {
-				$alerttrigger = true;
+			if ($emailtoclient == "Y") {
+				if ($this->dateExpectedBack != $_POST['dataexpectedbackfromtypist'] || 
+					$this->dateReceived != $_POST['datereceived'] ||
+					$this->dateBackFromTypist != $_POST['datebackfromtypist']) {
+					$alerttrigger = true;
+				}
 			}
-			
-			logError($this->dateExpectedBack . " - " . $_POST['dataexpectedbackfromtypist'] , false);
 			
 			for ($i = 0; $i < count($_POST['typistid']); $i++) {
 				$typist = $_POST['typistid'][$i];
@@ -846,9 +865,17 @@
 						$contactemail = $member['email'];
 						$contactfullname = $member['fullname'];
 						$contactfirstname = $member['firstname'];
-						$message = "TEST";
+						
+						if ($this->dateReceived != $_POST['datereceived']) {
+							$message = "Your transcription request for case number '$casenumber' has been received by iAfrcica Transcriptions, and will be sent out for transcription soon.";
 							
-//						smtpmailer($contactemail, "support@iafricatranscriptions.co.za", "I Africa Transcriptions (PTY) LTD", "Case changes", getEmailHeader() . "<h4>Dear $contactfirstname,</h4><p>" . $message . "</p>" . getEmailFooter());
+						} else {
+							$datesenttotypist = $_POST['datesenttotypist'];
+							$dataexpectedbackfromtypist = $_POST['dataexpectedbackfromtypist'];
+							$message = "Your transcription request for case number '$casenumber' has been sent out to a typist on '$datesenttotypist' and is expexted back from the typist on '$dataexpectedbackfromtypist'.";
+						}
+						
+						smtpmailer($contactemail, "support@iafricatranscriptions.co.za", "I Africa Transcriptions (PTY) LTD", "Case changes", getEmailHeader() . "<h4>Dear $contactfirstname,</h4><p>" . $message . "</p>" . getEmailFooter());
 					}
 				}
 			}

@@ -79,6 +79,39 @@
 		logError($qry . " - " . mysql_error());
 	}
 	
+	$qry = "SELECT A.emailtoclient, A.casenumber, D.email, D.fullname, D.firstname FROM 
+			{$_SESSION['DB_PREFIX']}cases A
+			INNER JOIN {$_SESSION['DB_PREFIX']}casecontacts B
+			ON B.caseid = A.id
+			INNER JOIN {$_SESSION['DB_PREFIX']}contacts D
+			ON D.id = B.contactid
+			WHERE A.id = $caseid";
+
+	$result = mysql_query($qry);
+	
+	if (! $result) logError("Error: " . mysql_error());
+	
+	while (($member = mysql_fetch_assoc($result))) {
+		$emailtoclient = $member['emailtoclient'];
+		$contactemail = $member['email'];
+		$contactfullname = $member['fullname'];
+		$contactfirstname = $member['firstname'];
+		$casenumber = $member['casenumber'];
+		$message = "Your transcription request for case number '$casenumber' has been finalized and an invoice created, please check your emails as you will receive the invoice from one of our office users soon.";
+		
+		if ($emailtoclient == "Y") {
+			smtpmailer(
+					$contactemail, 
+					"support@iafricatranscriptions.co.za", 
+					"I Africa Transcriptions (PTY) LTD", 
+					"Invoice Created", 
+					getEmailHeader() . "<h4>Dear $contactfirstname,</h4><p>" . $message . "</p>" . getEmailFooter()
+				);
+		}
+	}
+					
+	
+	
 	array_push($json, array("ok" => "1"));
 	
 	echo json_encode($json); 
