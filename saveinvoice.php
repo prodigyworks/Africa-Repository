@@ -92,7 +92,7 @@
 			$contactfullname = $member['fullname'];
 			$contactfirstname = $member['firstname'];
 			$casenumber = $member['casenumber'];
-			$message = "Your transcription request for case number '$casenumber' has been finalized and an invoice created, please check your emails as you will receive the invoice from one of our office users soon.";
+			$message = "Your transcription request for case number $casenumber has been finalized and an invoice created, please check your emails as you will receive the invoice from one of our office users soon.";
 
 			if ($emailtoclient == "Y") {
 				smtpmailer(

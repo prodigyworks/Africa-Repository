@@ -732,6 +732,36 @@
 				if (! $result) {
 					logError($qry . " - " . mysql_error());
 				}
+				
+				$qry = "SELECT email, fullname, firstname FROM {$_SESSION['DB_PREFIX']}contacts " .
+						"WHERE id = $contactid";
+			
+				$result = mysql_query($qry);
+				
+				if (! $result) logError("Error: " . mysql_error());
+				
+				while (($member = mysql_fetch_assoc($result))) {
+					$contactemail = $member['email'];
+					$contactfullname = $member['fullname'];
+					$contactfirstname = $member['firstname'];
+					$message = "";
+					
+					if ($_POST['datereceived'] != "") {
+						$message = "Your transcription request for case number $casenumber has been received by iAfrica Transcriptions, and will be sent out for transcription soon.";
+						
+					} else if ($_POST['datebackfromtypist'] != "") {
+						$message = "Your transcription request for case number $casenumber has been received back from the typist. The office is busy finalizing the transcript.";
+						
+					} else if ($_POST['dataexpectedbackfromtypist'] != "") {
+						$datesenttotypist = date("d/m/Y");
+						$dataexpectedbackfromtypist = $_POST['dataexpectedbackfromtypist'];
+						$message = "Your transcription request for case number $casenumber has been sent out to a typist on $datesenttotypist and is expected back from the typist on $dataexpectedbackfromtypist.";
+					}
+					
+					if ($message != "") {
+						smtpmailer($contactemail, "support@iafricatranscriptions.co.za", "I Africa Transcriptions (PTY) LTD", "Transcription updates", getEmailHeader() . "<h4>Dear $contactfirstname,</h4><p>" . $message . "</p>" . getEmailFooter());
+					}
+				}
 			}
 			
 			addAuditLog("C", "I", $caseid);
@@ -867,15 +897,18 @@
 						$contactfirstname = $member['firstname'];
 						
 						if ($this->dateReceived != $_POST['datereceived']) {
-							$message = "Your transcription request for case number '$casenumber' has been received by iAfrcica Transcriptions, and will be sent out for transcription soon.";
+							$message = "Your transcription request for case number $casenumber has been received by iAfrica Transcriptions, and will be sent out for transcription soon.";
+							
+						} else if ($this->dateBackFromTypist != $_POST['datebackfromtypist']) {
+							$message = "Your transcription request for case number $casenumber has been received back from the typist. The office is busy finalizing the transcript.";
 							
 						} else {
-							$datesenttotypist = $_POST['datesenttotypist'];
+							$datesenttotypist = date("d/m/Y");
 							$dataexpectedbackfromtypist = $_POST['dataexpectedbackfromtypist'];
-							$message = "Your transcription request for case number '$casenumber' has been sent out to a typist on '$datesenttotypist' and is expexted back from the typist on '$dataexpectedbackfromtypist'.";
+							$message = "Your transcription request for case number $casenumber has been sent out to a typist on $datesenttotypist and is expected back from the typist on $dataexpectedbackfromtypist.";
 						}
 						
-						smtpmailer($contactemail, "support@iafricatranscriptions.co.za", "I Africa Transcriptions (PTY) LTD", "Case changes", getEmailHeader() . "<h4>Dear $contactfirstname,</h4><p>" . $message . "</p>" . getEmailFooter());
+						smtpmailer($contactemail, "support@iafricatranscriptions.co.za", "I Africa Transcriptions (PTY) LTD", "Transcription updates", getEmailHeader() . "<h4>Dear $contactfirstname,</h4><p>" . $message . "</p>" . getEmailFooter());
 					}
 				}
 			}
