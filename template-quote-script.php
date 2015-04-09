@@ -475,7 +475,7 @@
 										$(this).dialog("close")
 																			
 										callAjax(
-												"emaildocument.php", 
+												"emailquote.php", 
 												{ 
 													id: currentQuoteID,
 													emailaddress: $("#quote_emailaddress").val()
